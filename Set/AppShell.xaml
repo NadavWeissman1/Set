@@ -6,7 +6,10 @@
     xmlns:local="clr-namespace:Set"
     Shell.FlyoutBehavior="Disabled"
     Title="Set">
-
+    <ShellContent
+       Title="Login"
+       ContentTemplate="{DataTemplate local:LoginPage}"
+       Route="LoginPage" />
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
