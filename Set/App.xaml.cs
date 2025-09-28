@@ -1,4 +1,6 @@
-﻿namespace Set
+﻿using Set.Views;
+
+namespace Set
 {
     public partial class App : Application
     {

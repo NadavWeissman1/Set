@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
 
-	<!-- Background -->
 	<rect width="1024" height="1024" rx="180" ry="180" fill="#fafafa" stroke="#ddd" stroke-width="10"/>
 
-	<!-- Card 1 (left) -->
 	<g transform="translate(140,220) rotate(-10)">
 		<rect x="0" y="0" width="240" height="360" rx="24" ry="24" fill="#ffffff" stroke="#222" stroke-width="8"/>
 		<ellipse cx="120" cy="180" rx="80" ry="45" fill="#8a57ff" fill-opacity="0.25" stroke="#6e2ff2" stroke-width="10"/>
 	</g>
 
-	<!-- Card 2 (middle) -->
 	<g transform="translate(392,200)">
 		<rect x="0" y="0" width="240" height="360" rx="24" ry="24" fill="#ffffff" stroke="#222" stroke-width="8"/>
 		<rect x="60" y="150" width="120" height="60" rx="20" ry="20" fill="#2ec27e" fill-opacity="0.25" stroke="#1aa85b" stroke-width="10"/>
 	</g>
 
-	<!-- Card 3 (right) -->
 	<g transform="translate(644,220) rotate(10)">
 		<rect x="0" y="0" width="240" height="360" rx="24" ry="24" fill="#ffffff" stroke="#222" stroke-width="8"/>
 		<path d="M 50 180 C 70 120 170 120 190 180 C 210 240 110 240 90 180 Z"
 			  fill="#ff4f67" fill-opacity="0.25" stroke="#ff4f67" stroke-width="10"/>
 	</g>
 
-	<!-- Big Title -->
 	<text x="512" y="940" text-anchor="middle"
 		  font-family="Arial Black, Segoe UI, sans-serif"
 		  font-size="200" font-weight="bold"

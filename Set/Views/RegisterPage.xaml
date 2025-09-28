@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Set.Views.RegisterPage"
+             xmlns:vm="clr-namespace:Set.ViewModels"
+             xmlns:m="clr-namespace:Set.Models"
+             x:DataType="vm:RegisterPageVM">
+
+    <VerticalStackLayout
+        Padding="30"
+        Spacing="20"
+        VerticalOptions="Center">
+        <Label
+            FontAttributes="Bold"
+            FontSize="40"
+            HorizontalOptions="Center"
+            Text="{x:Static m:Strings.RegisterPageTitle}" />
+        <Border
+            Padding="10"
+            Stroke="IndianRed"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="1">
+            <Entry
+                FontSize="20"
+                ClearButtonVisibility="WhileEditing"
+                Placeholder="{x:Static m:Strings.EmailPrompt}"
+                Keyboard="Email"
+                ReturnType="Next"
+                Text="{Binding Email}"
+                TextColor="DarkGrey"/>
+        </Border>
+        <Border
+            Padding="10"
+            Stroke="IndianRed"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="1">
+            <Entry
+                FontSize="20"
+                ClearButtonVisibility="WhileEditing"
+                Placeholder="{x:Static m:Strings.UserNamePrompt}"
+                ReturnType="Next"
+                Text="{Binding UserName}"
+                TextColor="DarkGrey"/>
+        </Border>
+        <Border
+            Padding="10"
+            Stroke="IndianRed"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="1">
+            <Grid
+                Padding="10"
+                ColumnDefinitions="*,Auto"
+                VerticalOptions="Center">
+                <Entry
+                    BackgroundColor="Transparent"
+                    FontSize="20"
+                    ClearButtonVisibility="WhileEditing"
+                    IsPassword="{Binding IsPassword}"
+                    Placeholder="{x:Static m:Strings.PasswordPrompt}"
+                    ReturnType="Done"
+                    VerticalOptions="Center"
+                    TextColor="DarkGrey"
+                    Text="{Binding Password}"/>
+                <Button
+                    BackgroundColor="Transparent"
+                    BorderWidth="0"
+                    Command="{Binding ToggleIsPasswordCommand}"
+                    FontSize="26"
+                    Style="{StaticResource IconButtonStyle}"
+                    HorizontalOptions="End"
+                    Text="{Binding IsPassword,Converter={StaticResource passwordIconConvert}}" 
+                    TextColor="IndianRed"
+                    VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+        <Border
+            Padding="10"
+            Stroke="IndianRed"
+            StrokeShape="RoundRectangle 10"
+            StrokeThickness="1">
+            <Grid
+                Padding="10"
+                ColumnDefinitions="*,Auto"
+                VerticalOptions="Center">
+                <Entry
+                    BackgroundColor="Transparent"
+                    FontSize="20"
+                    ClearButtonVisibility="WhileEditing"
+                    IsPassword="{Binding IsConfirmPassword}"
+                    Placeholder="{x:Static m:Strings.ConfirmPasswordPrompt}"
+                    ReturnType="Done"
+                    VerticalOptions="Center"
+                    TextColor="DarkGrey"
+                    Text="{Binding ConfirmPassword}"/>
+                <Button
+                    BackgroundColor="Transparent"
+                    BorderWidth="0"
+                    Command="{Binding ToggleIsConfirmPasswordCommand}"
+                    FontSize="26"
+                    Style="{StaticResource IconButtonStyle}"
+                    HorizontalOptions="End"
+                    Text="{Binding IsConfirmPassword,Converter={StaticResource passwordIconConvert}}" 
+                    TextColor="IndianRed"
+                    VerticalOptions="Center"/>
+            </Grid>
+        </Border>
+        <Grid
+            Padding="10"
+            ColumnDefinitions="*,*"
+            VerticalOptions="Center">
+            <Button
+                 Command="{Binding RegisterCommand}"
+                 CornerRadius="7"
+                 FontSize="20"
+                 HeightRequest="50"
+                 Text="{x:Static m:Strings.RegisterButtonPrompt}"
+                 TextColor="White" />
+            <Button
+                 Command="{Binding LoginWithInfo}"
+                 CornerRadius="7"
+                 FontSize="15"
+                 HeightRequest="50"
+                 Text="{Binding IsLoginInfo}"
+                 TextColor="White"
+                 Grid.Column="1" />
+
+
+        </Grid>
+        <Button
+            Command="{Binding RegisterCommand}"
+            CornerRadius="7"
+            FontSize="20"
+            HeightRequest="50"
+            Text="{x:Static m:Strings.RegisterButtonPrompt}"
+            TextColor="White" />
+
+    </VerticalStackLayout>
+</ContentPage>
