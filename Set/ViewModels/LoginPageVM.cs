@@ -7,7 +7,8 @@ namespace Set.ViewModels
 {
     internal partial class LoginPageVM:ObservableObject
     {
-        private User user = new();
+        private readonly User user = new();
+        public ICommand NavToRegisterCommand => new Command(NavToRegister);
         public ICommand LoginCommand { get; }
         public ICommand ToggleIsPasswordCommand { get; }
         public bool IsBusy { get; set; } = false;
@@ -48,11 +49,20 @@ namespace Set.ViewModels
             await Task.Delay(4000);
             IsBusy = false;
             OnPropertyChanged(nameof(IsBusy));
+            NavToMainPage();
+        }
+        public static async void NavToMainPage()
+        {
+            await Shell.Current.GoToAsync("///MainPage");
+        }
+        private async void NavToRegister()
+        {
+            await Shell.Current.GoToAsync("///RegisterPage");
         }
 
         private bool CanLogin()
         {
-            return (!string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(Password));
+            return (!string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(Password)&&user.CanLogin());
         }
 
 

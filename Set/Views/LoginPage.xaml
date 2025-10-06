@@ -68,5 +68,23 @@
             HeightRequest="50"
             Text="{x:Static m:Strings.LoginButtonPrompt}"
             TextColor="White" />
+        <Label HorizontalOptions="Center" FontSize="20">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{x:Static m:Strings.DontHaveAccount}" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        <Label HorizontalOptions="Center" FontSize="20">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{x:Static m:Strings.Register}" TextColor="Blue" TextDecorations="Underline">
+                        <Span.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavToRegisterCommand}" />
+                        </Span.GestureRecognizers>
+                    </Span>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
     </VerticalStackLayout>
 </ContentPage>

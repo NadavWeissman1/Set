@@ -6,11 +6,10 @@ namespace Set.ViewModels {
     internal partial class RegisterPageVM:ObservableObject
     {
         private readonly User user = new();
-        private readonly LoginWithInfo loginWithInfo = new();
+        public ICommand NavToLoginCommand => new Command(NavToLogin);
         public ICommand RegisterCommand { get; }
         public ICommand ToggleIsPasswordCommand { get; }
         public ICommand ToggleIsConfirmPasswordCommand { get; }
-        public string IsLoginInfo => loginWithInfo.IsLoginInfo;
         public string UserName
         {
             get => user.UserName;
@@ -49,7 +48,7 @@ namespace Set.ViewModels {
         }
         public bool CanRegister()
         {
-            return !string.IsNullOrWhiteSpace(user.UserName)&& !string.IsNullOrWhiteSpace(user.Password)&& !string.IsNullOrWhiteSpace(user.Email)&&!string.IsNullOrWhiteSpace(user.ConfirmPassword);
+            return !string.IsNullOrWhiteSpace(user.UserName)&& !string.IsNullOrWhiteSpace(user.Password)&& !string.IsNullOrWhiteSpace(user.Email)&&!string.IsNullOrWhiteSpace(user.ConfirmPassword)&&user.CanRegister();
         }
         public bool IsPassword { get; set; } = true;
         public bool IsConfirmPassword { get; set; } = true;
@@ -69,10 +68,14 @@ namespace Set.ViewModels {
             IsConfirmPassword = !IsConfirmPassword;
             OnPropertyChanged(nameof(IsConfirmPassword));
         }
-        private async void Register()
+
+        private async void NavToLogin()
         {
-                user.Register();         
-                await Shell.Current.GoToAsync("///LoginPage"); 
+            await Shell.Current.GoToAsync("///LoginPage");
+        }
+        private void Register()
+        {
+                user.Register();     
         }
 
 

@@ -104,35 +104,31 @@
                     VerticalOptions="Center"/>
             </Grid>
         </Border>
-        <Grid
-            Padding="10"
-            ColumnDefinitions="*,*"
-            VerticalOptions="Center">
-            <Button
-                 Command="{Binding RegisterCommand}"
-                 CornerRadius="7"
-                 FontSize="20"
-                 HeightRequest="50"
-                 Text="{x:Static m:Strings.RegisterButtonPrompt}"
-                 TextColor="White" />
-            <Button
-                 Command="{Binding LoginWithInfo}"
-                 CornerRadius="7"
-                 FontSize="15"
-                 HeightRequest="50"
-                 Text="{Binding IsLoginInfo}"
-                 TextColor="White"
-                 Grid.Column="1" />
-
-
-        </Grid>
         <Button
-            Command="{Binding RegisterCommand}"
-            CornerRadius="7"
-            FontSize="20"
-            HeightRequest="50"
-            Text="{x:Static m:Strings.RegisterButtonPrompt}"
-            TextColor="White" />
+             Command="{Binding RegisterCommand}"
+             CornerRadius="7"
+             FontSize="20"
+             HeightRequest="50"
+             Text="{x:Static m:Strings.RegisterButtonPrompt}"
+             TextColor="White" />
+        <Label HorizontalOptions="Center" FontSize="20">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{x:Static m:Strings.AlreadyHaveAccount}" />
 
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        <Label HorizontalOptions="Center" FontSize="20">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{x:Static m:Strings.Login}" TextColor="Blue" TextDecorations="Underline">
+                        <Span.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding NavToLoginCommand}" />
+                        </Span.GestureRecognizers>
+                    </Span>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
     </VerticalStackLayout>
 </ContentPage>
