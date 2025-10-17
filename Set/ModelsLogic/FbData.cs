@@ -11,13 +11,65 @@ namespace Set.ModelsLogic
         {
             
         }
-        public override async void CreateUserWithEmailAndPasswordAsync(string email, string password, string name, Action<System.Threading.Tasks.Task> OnComplete)
+        public override async Task<bool> CreateUserWithEmailAndPasswordAsync(string email, string password, string name, Func<Task, Task<bool>> OnCompleteRegister)
         {
-            await facl.CreateUserWithEmailAndPasswordAsync(email, password, name).ContinueWith(OnComplete);
+            Task<Firebase.Auth.UserCredential> firebaseTask = facl.CreateUserWithEmailAndPasswordAsync(email, password, name);
+            bool succeeded;
+
+            try
+            {
+                UserCredential credential = await firebaseTask;
+
+                // Immediately sign in the new user so Firestore writes can succeed
+                await facl.SignInWithEmailAndPasswordAsync(email, password);
+
+            }
+            catch (Exception ex)
+            {
+                TaskCompletionSource<Firebase.Auth.UserCredential> tcs = new();
+                tcs.SetException(ex);
+                firebaseTask = tcs.Task;
+            }
+            finally
+            {
+                succeeded = await OnCompleteRegister(firebaseTask);
+            }
+            return succeeded;
         }
-        public override async void SignInWithEmailAndPasswordAsync(string email, string password, Action<System.Threading.Tasks.Task> OnComplete)
+        public override async Task<bool> SignInWithEmailAndPWdAsync(string email, string password, Func<Task, Task<bool>> OnCompleteLogin)
         {
-            await facl.SignInWithEmailAndPasswordAsync(email, password).ContinueWith(OnComplete);
+            // Start Firebase sign-in
+            Task<Firebase.Auth.UserCredential> firebaseTask = facl.SignInWithEmailAndPasswordAsync(email, password);
+            bool succeeded;
+
+            try
+            {
+                // Await Firebase sign-in
+                await firebaseTask;
+            }
+            catch (Exception ex)
+            {
+                // Wrap the exception in a Task to pass to the callback
+                TaskCompletionSource<Firebase.Auth.UserCredential> tcs = new();
+                tcs.SetException(ex);
+                firebaseTask = tcs.Task;
+            }
+            finally
+            {
+                // Always invoke the callback, even if the sign-in failed
+                succeeded = await OnCompleteLogin(firebaseTask);
+            }
+            return succeeded;
+        }
+        public override async Task<T> GetUserDataAsync<T>(string key)
+        {
+            //this is a dummy function, since I dont have a database yet. But the structure of it still remains.
+            await Task.CompletedTask;
+            return default!;
+        }
+        public override async void SendResetEmailPasswordAsync(string email, Action<Task> OnComplete)
+        {
+            await facl.ResetEmailPasswordAsync(email).ContinueWith(OnComplete);
         }
         public override string DisplayName
         {

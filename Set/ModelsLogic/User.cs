@@ -1,49 +1,136 @@
-﻿using Set.Models;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+using Microsoft.Maui;
+using Set.Models;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static Set.Models.ConstData;
-
 namespace Set.ModelsLogic
 {
     class User:UserModel
     {
-        public override bool Login()
+        readonly Strings dynamicStrings = new();
+        public override async Task<bool> Login()
         {
-            return true;
+            bool success = await fbd.SignInWithEmailAndPWdAsync(Email, Password, OnCompleteLogin);
+            return success;
         }
-        public override void Register()
+        public override void ResetPassword()
         {
-            fbd.CreateUserWithEmailAndPasswordAsync(Email, Password, UserName, OnComplete);
+            fbd.SendResetEmailPasswordAsync(ResetEmail, OnCompleteResetPassword);
         }
-
-        private void OnComplete(Task task)
+        private void OnCompleteResetPassword(Task task)
         {
-            if (!task.IsCompletedSuccessfully)
+        }
+        public override async Task<bool> Register()
+        {
+            bool succeeded = await fbd.CreateUserWithEmailAndPasswordAsync(Email, Password, UserName, OnCompleteRegister);
+            return succeeded;
+        }
+        private async Task<bool> OnCompleteRegister(Task task)
+        {
+            if (task.IsCompletedSuccessfully)
             {
-                MainThread.BeginInvokeOnMainThread(async () =>
-                {
-                    string errorMessage = task.Exception?.Message ?? Strings.UKErrorPrompt;
-                    await Shell.Current.DisplayAlert(Strings.CreateUserError, errorMessage, Strings.Ok);
-                });
-            }//next line breaks mvvm, needs fixing in the future
+                RegisterSaveToPreferences();
+                await Toast.Make(Strings.UserCreatedText,ToastDuration.Long,14).Show();
+                return true;
+            }
             else
             {
-                Shell.Current.GoToAsync("///LoginPage");
+                string errorMessage = IdentifyFireBaseError(task);
+                await Shell.Current.DisplayAlert(Strings.CreateUserError, errorMessage, Strings.Ok);
+                return false;
             }
         }
+        private async Task<bool> OnCompleteLogin(Task task)
+        {
+            if (task.IsCompletedSuccessfully)
+            {
+                await LoginSaveToPreferencesAsync();
+                await Toast.Make(Strings.UserLoggedText, ToastDuration.Long,14).Show();
+                return true;
+            }
+            else
+            {
+                string errorMessage = IdentifyFireBaseError(task);
+                await Shell.Current.DisplayAlert(Strings.LoginErrorTitle, errorMessage, Strings.Ok);
+                return false;
+            }
+        }
+        public override string IdentifyFireBaseError(Task task)
+        {
+            Exception? ex = task.Exception?.InnerException;
+            string errorMessage = string.Empty;
 
+            if (ex != null)
+            {
+                try
+                {
+                    // Find the "Response:" part
+                    int responseIndex = ex.Message.IndexOf("Response:");
+                    if (responseIndex >= 0)
+                    {
+                        // Take everything after "Response:"
+                        string jsonPart = ex.Message.Substring(responseIndex + "Response:".Length).Trim();
 
-        private void SaveToPreferences()
+                        // Some Firebase responses might have extra closing braces, remove trailing stuff
+                        int lastBrace = jsonPart.LastIndexOf('}');
+                        if (lastBrace >= 0)
+                            jsonPart = jsonPart.Substring(0, lastBrace + 1);
+
+                        // Parse JSON
+                        JsonDocument json = JsonDocument.Parse(jsonPart);
+
+                        JsonElement errorElem = json.RootElement.GetProperty("error");
+                        string firebaseMessage = errorElem.GetProperty("message").ToString();
+
+                        errorMessage = firebaseMessage switch
+                        {
+                            Keys.EmailExistsErrorKey => Strings.EmailExistsError,
+                            Keys.OperationNotAllowedErrorKey => Strings.OperationNotAllowedError,
+                            Keys.WeakPasswordErrorKey => Strings.WeakPasswordError,
+                            Keys.MissingEmailErrorKey => Strings.MissingEmailError,
+                            Keys.MissingPasswordErrorKey => Strings.MissingPasswordError,
+                            Keys.InvalidEmailErrorKey => Strings.InvalidEmailError,
+                            Keys.InvalidCredentialsErrorKey => Strings.InvalidCredentialsError,
+                            Keys.UserDisabledErrorKey => Strings.UserDisabledError,
+                            Keys.ManyAttemptsErrorKey => Strings.ManyAttemptsError,
+                            _ => Strings.DefaultRegisterError,
+                        };
+                    }
+                }
+                catch
+                {
+                    errorMessage = Strings.FailedJsonError;
+                }
+            }
+            return errorMessage;
+        }
+
+        private void RegisterSaveToPreferences()
         {
             Preferences.Set(Keys.UserNameKey, UserName);
             Preferences.Set(Keys.PasswordKey, Password);
             Preferences.Set(Keys.EmailKey, Email);
             Preferences.Set(Keys.ConfirmPasswordKey, ConfirmPassword);
         }
+        private async Task LoginSaveToPreferencesAsync()
+        {
+            //THIS NEXT LINE IS A DUMMY JUST SO THE FUNCTION WILL STILL BE ASYNC, BECAUSE IN THE FUTURE WE WANNA GET
+            //THE NAME FROM THE DATABASE, AND ITS ASYNC.
+            await Task.CompletedTask;
+            // Store everything in Preferences
+            //FOR NOW, IT WILL STORE THE NAME DUMMY IN PREFERENCES, BUT WHEN ADDING A DATABASE IT SHOULD STORE
+            //A STRING THAT CONTAINS THE VALUE OF THE NAME THAT'S IN THE DATABASE.
+
+            Preferences.Set(Keys.UserNameKey, "dummy");
+            Preferences.Set(Keys.EmailKey, Email);
+        }
 
         public override bool CanLogin()
         {
-            return IsUsernameValid() && IsPasswordValid();   
+            return IsEmailValid() && IsPasswordValid();   
         }
 
         public override bool CanRegister()
@@ -52,26 +139,81 @@ namespace Set.ModelsLogic
         }
         private bool IsUsernameValid()
         {
-            return UserName.Length >= MinCharInUN && UserName.Length <= MaxCharInUN;
+            if (UserName.Length < MinCharInUN)
+            {
+                Shell.Current.DisplayAlert(Strings.UserNameShortErrorTitle, dynamicStrings.UserNameShortErrorMessage, Strings.Ok);
+                return false;
+            }
+            if (UserName.Length > MaxCharInUN)
+            {
+                Shell.Current.DisplayAlert(Strings.UserNameTooLongErrorTitle, dynamicStrings.UserNameTooLongErrorMessage, Strings.Ok);
+                return false;
+            }
+            if (!ContainsNumber(UserName))
+            {
+                Shell.Current.DisplayAlert(Strings.UserNameNumberErrorTitle, Strings.UserNameNumberErrorMessage, Strings.Ok);
+                return false;
+            }
+            return true;
         }
         private bool IsPasswordValid()
         {
-            return Password.Length >= MinCharInPW && Password.Length <= MaxCharInPW&&HasLowerCase(Password)&&HasUpperCase(Password)&&ContainsNumber(Password);
+            if (Password.Length < MinCharInPW)
+            {
+                Shell.Current.DisplayAlert(Strings.PasswordShortErrorTitle, dynamicStrings.PasswordShortErrorMessage, Strings.Ok);
+                return false;
+            }
+            if(Password.Length > MaxCharInPW)
+            {
+                Shell.Current.DisplayAlert(Strings.PasswordTooLongErrorTitle, dynamicStrings.PasswordTooLongErrorMessage, Strings.Ok);
+                return false;
+            }
+            if (!ContainsNumber(Password))
+            {
+                Shell.Current.DisplayAlert(Strings.PasswordNumberErrorTitle, Strings.PasswordNumberErrorMessage, Strings.Ok);
+                return false;
+            }
+            if (!HasLowerCase(Password))
+            {
+                Shell.Current.DisplayAlert(Strings.PasswordLowerCaseErrorTitle, Strings.PasswordLowerCaseErrorMessage, Strings.Ok);
+                return false;
+            }
+            if (!HasUpperCase(Password))
+            {
+                Shell.Current.DisplayAlert(Strings.PasswordUpperCaseErrorTitle, Strings.PasswordUpperCaseErrorMessage, Strings.Ok);
+                return false;
+            }
+            return true;
         }
         public bool IsConfirmPasswordValid()
         {
-            return ConfirmPassword.Length >= MinCharInPW && ConfirmPassword.Length <= MaxCharInPW && HasLowerCase(ConfirmPassword) && HasUpperCase(ConfirmPassword)&&ContainsNumber(ConfirmPassword)&&Password==ConfirmPassword;
+            if(Password!=ConfirmPassword)
+            {
+                Shell.Current.DisplayAlert(Strings.ConfirmPasswordErrorTitle, Strings.ConfirmPasswordErrorMessage, Strings.Ok);
+                return false;
+            }
+            return true;
         }
         public bool IsEmailValid()
         {
-            if (HasDot(Email) && HasAtSign(Email))
+            if(Email.Length < MinCharInEmail)
             {
-                if(AtIndex(Email)!=0&&AtIndex(Email)!=Email.Length-1&&DotIndex(Email)!=0&&DotIndex(Email)!=Email.Length-1&&Email.Length>=MinCharInEmail)
+               Shell.Current.DisplayAlert(Strings.EmailShortErrorTitle, dynamicStrings.EmailShortErrorMessage, Strings.Ok);
+            }
+            else if (HasDot(Email) && HasAtSign(Email))
+            {
+                if (AtIndex(Email) == 0 || AtIndex(Email) == Email.Length - 1 || DotIndex(Email) == 0 || DotIndex(Email) == Email.Length - 1)
                 {
-                    return true;
+                    Shell.Current.DisplayAlert(Strings.EmailInvalidErrorTitle, Strings.EmailInvalidErrorMessage, Strings.Ok);
+                    return false;
                 }
             }
-            return false;
+            else
+            {
+                Shell.Current.DisplayAlert(Strings.EmailInvalidErrorTitle, Strings.EmailInvalidErrorMessage, Strings.Ok);
+                return false;
+            }
+                return true;
         }
         private static bool HasUpperCase(string str)
         {

@@ -6,40 +6,47 @@
              xmlns:m="clr-namespace:Set.Models"
              x:DataType="vm:LoginPageVM"
              IsBusy="{Binding IsBusy}">
-
-    <VerticalStackLayout
+    <Grid>
+        <Image
+            Source="backgroud.png"
+            Aspect="AspectFill"
+            Grid.RowSpan="1"
+            Grid.ColumnSpan="1"
+            />
+        <VerticalStackLayout
         Padding="30"
         Spacing="20"
         VerticalOptions="Center"
     >
-        <Label
+            <Label
             FontAttributes="Bold"
             FontSize="40"
             HorizontalOptions="Center"
             Text="{x:Static m:Strings.LoginPageTitle}"/>
-        <Border
+            <Border
             Padding="10"
             Stroke="IndianRed"
             StrokeShape="RoundRectangle 10"
             StrokeThickness="1">
-            <Entry
+                <Entry
                 FontSize="20"
                 ClearButtonVisibility="WhileEditing"
-                Placeholder="{x:Static m:Strings.UserNamePrompt}"
+                Placeholder="{x:Static m:Strings.EmailPrompt}"
                 ReturnType="Next"
-                Text="{Binding UserName}"
+                Keyboard="Email"
+                Text="{Binding Email}"
                 TextColor="DarkGrey"/>
-        </Border>
-        <Border
+            </Border>
+            <Border
             Padding="10"
             Stroke="IndianRed"
             StrokeShape="RoundRectangle 10"
             StrokeThickness="1">
-            <Grid
+                <Grid
                 Padding="10"
                 ColumnDefinitions="*,Auto"
                 VerticalOptions="Center">
-                <Entry
+                    <Entry
                     BackgroundColor="Transparent"
                     FontSize="20"
                     ClearButtonVisibility="WhileEditing"
@@ -49,42 +56,56 @@
                     VerticalOptions="Center"
                     TextColor="DarkGrey"
                     Text="{Binding Password}"/>
-                <Button
+                    <Button
                     BackgroundColor="Transparent"
                     BorderWidth="0"
                     Command="{Binding ToggleIsPasswordCommand}"
                     FontSize="26"
                     Style="{StaticResource IconButtonStyle}"
                     HorizontalOptions="End"
-                    Text="{Binding IsPassword,Converter={StaticResource passwordIconConvert}}" 
+                    FontFamily="MaterialSymbols"
+                    Text="{Binding IsPassword, Converter={StaticResource passwordIconConvert}}" 
                     TextColor="IndianRed"
                     VerticalOptions="Center"/>
-            </Grid>
-        </Border>
-        <Button
+                </Grid>
+            </Border>
+            <Button
             Command="{Binding LoginCommand}"
             CornerRadius="7"
             FontSize="20"
             HeightRequest="50"
             Text="{x:Static m:Strings.LoginButtonPrompt}"
             TextColor="White" />
-        <Label HorizontalOptions="Center" FontSize="20">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span Text="{x:Static m:Strings.DontHaveAccount}" />
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-        <Label HorizontalOptions="Center" FontSize="20">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span Text="{x:Static m:Strings.Register}" TextColor="Blue" TextDecorations="Underline">
-                        <Span.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding NavToRegisterCommand}" />
-                        </Span.GestureRecognizers>
-                    </Span>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-    </VerticalStackLayout>
+            <Label HorizontalOptions="Center" FontSize="20">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{x:Static m:Strings.DontHaveAccount}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label HorizontalOptions="Center" FontSize="20">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{x:Static m:Strings.Register}" TextColor="Red" TextDecorations="Underline">
+                            <Span.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding NavToRegisterCommand}" />
+                            </Span.GestureRecognizers>
+                        </Span>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label HorizontalOptions="Center" FontSize="15">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{x:Static m:Strings.ForgotPW}" />
+                        <Span Text="{x:Static m:Strings.ResetPW}" TextColor="Red" TextDecorations="Underline" FontAttributes="Bold">
+                            <Span.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ResetPasswordCommand}" />
+                            </Span.GestureRecognizers>
+                        </Span>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

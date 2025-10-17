@@ -11,12 +11,21 @@ namespace Set.ViewModels
         public ICommand NavToRegisterCommand => new Command(NavToRegister);
         public ICommand LoginCommand { get; }
         public ICommand ToggleIsPasswordCommand { get; }
+        public ICommand ResetPasswordCommand => new Command(ResetPassword);
         public bool IsBusy { get; set; } = false;
-        public string UserName {
-            get => user.UserName;
+        public string ResetEmail
+        {
+            get => user.ResetEmail;
             set
             {
-                user.UserName = value;
+                user.ResetEmail = value;
+            }
+        }
+        public string Email {
+            get => user.Email;
+            set
+            {
+                user.Email = value;
                 (LoginCommand as Command)?.ChangeCanExecute();
             }
         }
@@ -32,7 +41,7 @@ namespace Set.ViewModels
         
         public LoginPageVM()
         {
-            LoginCommand = new Command(async () => await Login(), CanLogin);
+            LoginCommand = new Command(async () => await Login());
             ToggleIsPasswordCommand = new Command(ToggleIsPassword);
         }
 
@@ -44,12 +53,30 @@ namespace Set.ViewModels
 
         private async Task Login()
         {
-            IsBusy = true;
-            OnPropertyChanged(nameof(IsBusy));
-            await Task.Delay(4000);
-            IsBusy = false;
-            OnPropertyChanged(nameof(IsBusy));
-            NavToMainPage();
+            if (CanLogin())
+            {
+                IsBusy = true;
+                OnPropertyChanged(nameof(IsBusy));
+                bool isSuccesful = await user.Login();
+                await Task.Delay(3500);
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsBusy));
+                if (isSuccesful) 
+                    NavToMainPage();
+            }
+        }
+        public async void ResetPassword()
+        {
+            string resetEmail = await Shell.Current.DisplayPromptAsync(
+                Strings.ResetPWPrompt,
+                Strings.ResetEmailPrompt,
+                Strings.Ok,
+                Strings.Cancel,
+                maxLength: 50,
+                keyboard: Microsoft.Maui.Keyboard.Email
+                );
+            ResetEmail = resetEmail;
+            user.ResetPassword();
         }
         public static async void NavToMainPage()
         {
@@ -62,7 +89,7 @@ namespace Set.ViewModels
 
         private bool CanLogin()
         {
-            return (!string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(Password)&&user.CanLogin());
+            return (!string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password)&&user.CanLogin());
         }
 
 

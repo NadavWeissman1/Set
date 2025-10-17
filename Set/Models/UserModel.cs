@@ -1,10 +1,4 @@
 ﻿using Set.ModelsLogic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Set.Models
 {
     abstract class UserModel
@@ -14,10 +8,13 @@ namespace Set.Models
         public string ConfirmPassword { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public abstract bool Login();
-        public abstract void Register();
+        public string ResetEmail { get; set; } = string.Empty;
+        public abstract Task Login();
+        public abstract Task Register();
+        public abstract string IdentifyFireBaseError(Task task);
         public abstract bool CanLogin();
         public abstract bool CanRegister();
+        public abstract void ResetPassword();
 
     }
 }

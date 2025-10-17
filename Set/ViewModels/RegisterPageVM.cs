@@ -10,6 +10,7 @@ namespace Set.ViewModels {
         public ICommand RegisterCommand { get; }
         public ICommand ToggleIsPasswordCommand { get; }
         public ICommand ToggleIsConfirmPasswordCommand { get; }
+        public bool IsBusy { get; set; } = false;
         public string UserName
         {
             get => user.UserName;
@@ -54,7 +55,7 @@ namespace Set.ViewModels {
         public bool IsConfirmPassword { get; set; } = true;
         public RegisterPageVM()
         {
-            RegisterCommand = new Command(Register, CanRegister);
+            RegisterCommand = new Command(async () => await Register());
             ToggleIsPasswordCommand = new Command(ToggleIsPassword);
             ToggleIsConfirmPasswordCommand = new Command(ToggleIsConfirmPassword);
         }
@@ -73,9 +74,22 @@ namespace Set.ViewModels {
         {
             await Shell.Current.GoToAsync("///LoginPage");
         }
-        private void Register()
+        public static async void NavToMainPage()
         {
-                user.Register();     
+            await Shell.Current.GoToAsync("///MainPage");
+        }
+        private async Task Register()
+        {
+            if (CanRegister())
+            {
+                IsBusy = true;
+                OnPropertyChanged(nameof(IsBusy));
+                bool isSuccesful = await user.Register();
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsBusy));
+                if(isSuccesful) 
+                   NavToMainPage();
+            }
         }
 
 
